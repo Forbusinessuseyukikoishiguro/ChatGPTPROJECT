@@ -1,0 +1,107 @@
+/* 全体のスタイル */
+body {
+    background-color: #f8f9fa;
+}
+
+/* カードのスタイル */
+.card {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    border-bottom: none;
+}
+
+/* 検索結果のスタイル */
+.search-result {
+    white-space: pre-wrap;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* 履歴アイテムのスタイル */
+#search-history {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.history-item {
+    cursor: pointer;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+}
+
+.history-item:hover {
+    background-color: #f1f1f1;
+}
+
+.history-item.active {
+    background-color: #e9f0ff;
+    border-left: 3px solid #0d6efd;
+}
+
+.history-query {
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 5px;
+}
+
+.history-timestamp {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+/* ボタンのスタイル */
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+/* トークン情報のスタイル */
+#token-info, #history-token-info {
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+
+/* ナビゲーションのアクティブスタイル */
+.navbar-nav .nav-link.active {
+    font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.25rem;
+}
+
+/* フッターのスタイル */
+footer {
+    border-top: 1px solid #eee;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .row {
+        flex-direction: column;
+    }
+    
+    .col-md-4, .col-md-8 {
+        width: 100%;
+    }
+    
+    #history-detail {
+        margin-top: 20px;
+    }
+}

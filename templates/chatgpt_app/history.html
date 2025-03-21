@@ -1,0 +1,135 @@
+{% extends 'chatgpt_app/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>検索履歴</h1>
+    <form action="{% url 'export_history' %}" method="post" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-primary">
+            <i class="bi bi-download"></i> エクスポート
+        </button>
+    </form>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">履歴一覧</h5>
+            </div>
+            <div class="card-body p-0">
+                <div id="search-history">
+                    {% if histories %}
+                        {% for history in histories %}
+                            <div class="history-item" data-id="{{ history.id }}">
+                                <div class="history-query">{{ history.query|truncatechars:40 }}</div>
+                                <div class="history-timestamp">{{ history.timestamp|date:"Y-m-d H:i:s" }}</div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div id="no-history" class="p-3 text-center text-muted">
+                            検索履歴がありません
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div id="history-detail" class="card d-none">
+            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">履歴詳細</h5>
+                <div class="d-flex">
+                    <small id="history-detail-time" class="text-white me-2"></small>
+                    <form id="delete-form" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body">
+                <h6>検索内容:</h6>
+                <div id="history-query" class="search-result mb-3"></div>
+                
+                <h6>検索結果:</h6>
+                <div id="history-result" class="search-result"></div>
+                
+                <div id="history-token-info" class="mt-3 text-muted small">
+                    <p id="history-token-display"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const historyItems = document.querySelectorAll('.history-item');
+    const historyDetail = document.getElementById('history-detail');
+    const historyQuery = document.getElementById('history-query');
+    const historyResult = document.getElementById('history-result');
+    const historyDetailTime = document.getElementById('history-detail-time');
+    const historyTokenDisplay = document.getElementById('history-token-display');
+    const deleteForm = document.getElementById('delete-form');
+    
+    // 履歴アイテムのクリックイベント
+    historyItems.forEach(item => {
+        item.addEventListener('click', async function() {
+            // アクティブクラスを設定
+            historyItems.forEach(el => {
+                el.classList.remove('active');
+            });
+            item.classList.add('active');
+            
+            const historyId = item.dataset.id;
+            
+            // 削除フォームのアクションを更新
+            deleteForm.action = `/history/${historyId}/delete/`;
+            
+            // 履歴の詳細を取得
+            try {
+                const response = await fetch(`/history/${historyId}/`);
+                const historyItem = await response.json();
+                displayHistoryDetail(historyItem);
+            } catch (error) {
+                console.error('履歴詳細の取得に失敗しました:', error);
+            }
+        });
+    });
+    
+    // 履歴詳細を表示
+    function displayHistoryDetail(item) {
+        historyQuery.textContent = item.query;
+        historyResult.textContent = item.result;
+        historyDetailTime.textContent = formatTime(new Date(item.timestamp));
+        
+        // トークン情報の表示
+        const tokens = item.tokens;
+        if (tokens) {
+            historyTokenDisplay.textContent = `トークン使用量: プロンプト ${tokens.prompt_tokens || 'N/A'} + 完了 ${tokens.completion_tokens || 'N/A'} = 合計 ${tokens.total_tokens || 'N/A'}`;
+        } else {
+            historyTokenDisplay.textContent = '';
+        }
+        
+        historyDetail.classList.remove('d-none');
+    }
+    
+    // 日時フォーマット
+    function formatTime(date) {
+        return date.toLocaleString('ja-JP', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    }
+});
+</script>
+{% endblock %}
